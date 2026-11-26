@@ -9,6 +9,7 @@
 	import { goto } from "$app/navigation"
 	import type { Readable } from "svelte/store"
 	import type { PokemonSpecies } from "$lib/poke5e/species"
+	import { inStorage } from "../storage"
 
 	export let trainer: TrainerStore
 	export let allSpecies: Readable<PokemonSpecies[]>
@@ -45,7 +46,8 @@
 <Title value="Rest {$trainer.info.name}" />
 <Card title="Rest {$trainer.info.name}">
 	{#if canEdit}
-		<TrainerRester trainer={$trainer} {allSpecies} {saving} on:cancel={cancel} on:submit={update} />
+		<p>Team rests apply to active party Pokémon; stored Pokémon can be rested individually.</p>
+		<TrainerRester trainer={{...$trainer,pokemon:inStorage($trainer.pokemon,"party")}} {allSpecies} {saving} on:cancel={cancel} on:submit={update} />
 	{:else}
 		<section>
 			<p>You do not have permission to edit this trainer.</p>

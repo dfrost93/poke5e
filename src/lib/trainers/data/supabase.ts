@@ -41,6 +41,7 @@ import { MoveType } from "$lib/moves/type"
 import { MoveRange } from "$lib/moves/range"
 import { MoveDuration } from "$lib/moves/duration"
 import * as list from "$lib/utils/list"
+import type { PokemonStorage } from "../storage"
 
 const TRAINER_AVATARS_BUCKET = "trainer_avatars"
 
@@ -695,6 +696,7 @@ export class SupabaseTrainerProvider implements TrainerDataProvider {
 		const defaultAbility = pokemon.abilities.normal[0]
 
 		const trainerPokemon: Omit<TrainerPokemon, "id"> = {
+			storage: "party",
 			trainerId: trainerId,
 			pokemonId: pokemon.id,
 			nickname: pokemon.data.name,
@@ -837,6 +839,13 @@ export class SupabaseTrainerProvider implements TrainerDataProvider {
 		}
 
 		return await this.getOnePokemon(trainerId, data, readKey)
+	}
+
+	setPokemonStorage = async (writeKey: ReadWriteKey, readKey: ReadWriteKey, id: PokemonId, storage: PokemonStorage): Promise<void> => {
+		const { data, error } = await this.supabase.rpc("set_pokemon_storage", {
+			_write_key: writeKey, _id: id, _storage: storage,
+		}).single<number>()
+		if (error || data !== 1) throw new TrainerDataProviderError("Could not move Pokémon between party and PC (" + readKey + ").", error ?? undefined)
 	}
 
 	reorderPokemonTeam = async (writeKey: ReadWriteKey, readKey: ReadWriteKey, order: TrainerPokemon[]): Promise<boolean> => {
@@ -1403,6 +1412,7 @@ function isReferenceAbility(it: AbilityItem): it is { referenceId: string } {
 
 type PokemonRow = {
 	id: number,
+	storage?: string,
 	trainer_id: string,
 	species: string,
 	nickname: string,
@@ -1511,6 +1521,7 @@ const consolidateSkillRankProfAndRank = (ranks: Record<Skill, [boolean, number]>
 
 const rowToPokemon = async (row: PokemonRow, getStorageResource: (name: string) => StorageResource): Promise<TrainerPokemon> => ({
 	id: row.id.toString(),
+	storage: row.storage === "box" ? "box" : "party",
 	trainerId: row.trainer_id,
 	pokemonId: new SpeciesIdentifier(row.species),
 	nickname: row.nickname,

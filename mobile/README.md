@@ -1,0 +1,7 @@
+# Android development preview
+
+The app packages the same SvelteKit static output into a native Android WebView via Capacitor, without requiring an upstream website or redirecting the user to a browser. The Android ID is com.poke5eadvanced.app (provisional). The Android workflow is manual, with no production deployment. It requires a separate Supabase project with all repository migrations applied, a public client (anon/publishable) key, and the HTTPS user-assets service configured. Do not use a service-role key or the original app's backend.
+
+Configure repository Actions secrets ADVANCED_SUPABASE_URL, ADVANCED_SUPABASE_PUBLIC_KEY and ADVANCED_USER_ASSETS_BASE_URL, then run the Poké5e Advanced Android APK workflow on advanced/rules-automation. Download its debug APK artifact only after the checks pass. Android may require permission to install from the browser/file manager. The first APK is a development build; signing continuity, app icon/splash, deep links, Android system back, WebView navigation, network and real device tests are pending. Debug signing keys on fresh runners may differ; do not rely on in-place upgrades or store real data until the release signing and backup procedure is established.
+
+Reference content is bundled in the APK, but trainer and PC storage writes currently require internet and the independent backend. True offline character management and sync need further implementation. Never use the original production database.

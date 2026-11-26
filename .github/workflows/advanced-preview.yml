@@ -25,8 +25,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: cp .env.example .env
-      - name: Type check
-        run: pnpm check
-      - name: Build static preview
-        if: ${{ !cancelled() }}
+      - name: Build static preview (generates localization files)
         run: pnpm build
+      - name: Type check
+        if: ${{ !cancelled() }}
+        run: pnpm check
