@@ -46,8 +46,8 @@
 </script>
 
 <Fieldset title="{m.abilities()}">
-	{#each withIds as ability (ability.id)}
-		<SpeciesAbilityField id={ability.id} value={ability.value} {disabled} on:remove={remove(ability.id)} {species} />
+	{#each withIds as ability, index (ability.id)}
+		<SpeciesAbilityField id={ability.id} bind:value={withIds[index].value} {disabled} on:remove={remove(ability.id)} {species} />
 	{/each}
 	{#if values.length === 0}
 		<HintText>{m.noAbilities()}</HintText>

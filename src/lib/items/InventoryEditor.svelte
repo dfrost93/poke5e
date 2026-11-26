@@ -34,8 +34,8 @@
 </script>
 
 <div class="inventory-editor">
-	{#each values as item (item.id)}
-		<ItemEditor value={item} {disabled} {groupOrder} on:remove={removeItem(item.id)} />
+	{#each values as item, index (item.id)}
+		<ItemEditor bind:value={values[index]} {disabled} {groupOrder} on:remove={removeItem(item.id)} />
 	{/each}
 	<div class="row">
 		<Button on:click={addStandardItem}>{m.addItem()}</Button>

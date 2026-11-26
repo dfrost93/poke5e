@@ -95,8 +95,8 @@
 				<InstructionText>No known moves yet. Tap "Show Add Moves" below to reveal a list of moves you can learn. Use the "+" button to add the move!</InstructionText>
 			{/if}
 			<div class="move-list">
-				{#each values as move (move.id)}
-					<MoveEditor value={move} {species} {disabled} onremove={removeMove(move.id)} onchange={replaceMove} {level} />
+				{#each values as move, index (move.id)}
+					<MoveEditor bind:value={values[index]} {species} {disabled} onremove={removeMove(move.id)} onchange={replaceMove} {level} />
 				{/each}
 			</div>
 		</div>

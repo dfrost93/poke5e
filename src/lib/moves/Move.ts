@@ -167,7 +167,7 @@ export class Move extends DataClass<{
 		const stabToUse = forCharacter.stab ?? new Stab({ base: "default", bonus: 0 })
 		result.damage = this.dice ? MoveDice.damage(this.dice, stabToUse, attributeMod, forCharacter.learnedMove.customization.type ?? this.type, forCharacter.type, forCharacter.level, rulesVersion) : undefined
 		if (result.damage == null) {
-			result.damage = this.damage?.damage(stabToUse, attributeMod, this.type, forCharacter.type, forCharacter.level, rulesVersion)
+			result.damage = this.damage?.damage(stabToUse, attributeMod, forCharacter.learnedMove.customization.type ?? this.type, forCharacter.type, forCharacter.level, rulesVersion)
 		}
 
 		result = LearnedMove.applyToMoveStats(forCharacter.learnedMove, result)
