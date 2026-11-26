@@ -109,6 +109,7 @@
 		proficiencies={pokemon.proficiencies}
 		type={pokemon.type}
 		specializations={trainer.specializations}
+		featureTrainer={trainer}
 	/>
 	<FlatDl>
 		<TypeEffectiveness type={pokemon.type} />
@@ -127,7 +128,7 @@
 	</section>
 {/if}
 <section>
-	<MovesInfo {pokemon} {editable} on:update={onUpdatePp} />
+	<MovesInfo {pokemon} {trainer} {editable} on:update={onUpdatePp} />
 </section>
 {#if pokemon.notes?.length > 0}
 	<hr />

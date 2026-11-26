@@ -86,7 +86,7 @@
 </SideArtCardSection>
 <section class="stats">
 	<AttributeBlock attributes={trainer.attributes} />
-	<SkillsInfo level={trainer.level} attributes={trainer.attributes} savingThrows={trainer.savingThrows} proficiencies={trainer.proficiencies} />
+	<SkillsInfo level={trainer.level} attributes={trainer.attributes} savingThrows={trainer.savingThrows} proficiencies={trainer.proficiencies} featureTrainer={trainer} />
 	{#if hasSpecialization(trainer.specializations)}
 		<h3>Specializations</h3>
 		<SpecializationsInfo specializations={trainer.specializations} />

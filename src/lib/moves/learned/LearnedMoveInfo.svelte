@@ -16,12 +16,16 @@
 	import { MoveTime } from "../time"
 	import type { LearnedMove } from "./LearnedMove"
 	import { MovePower } from "../MovePower"
+	import type { TrainerPokemon, TrainerInfo } from "$lib/trainers/types"
+	import { calculateSheetMove } from "$lib/poke5e/automation/SheetRules"
 
 	// needed because svelte strips away ending spaces
 	const COMMA_SPACE = ", "
 
 	let {
 		value,
+		pokemon,
+		trainer,
 		level,
 		stab,
 		pokemonType,
@@ -30,6 +34,8 @@
 		onupdatepp,
 	}: {
 		value: LearnedMove,
+		pokemon?: TrainerPokemon,
+		trainer?: TrainerInfo,
 		level: Level,
 		stab: Stab,
 		pokemonType: PokemonType,
@@ -40,7 +46,8 @@
 
 	const move = $derived($MovesStore.result?.find((it) => it.id === value.moveId))
 	const currentPp = $derived(value.pp.current)
-	const moveStats = $derived(move?.calculateMoveStats($currentEdition, {
+	const automated = $derived(move && pokemon ? calculateSheetMove($currentEdition, move, value, pokemon, trainer) : undefined)
+	const moveStats = $derived(automated?.stats ?? move?.calculateMoveStats($currentEdition, {
 		attributes: attributes,
 		level: level,
 		type: pokemonType.data,
@@ -91,6 +98,9 @@
 		{#if Object.values(moveStats).filter((it) => it != null).length > 0}
 			<div class="move-stats">
 				<MoveStatsInfo value={moveStats} />
+				{#if automated?.notes.length}
+					<p class="smaller-font" style:padding="0.5em">Automation: {automated.notes.join(" · ")}</p>
+				{/if}
 			</div>
 		{/if}
 		<div class="space-inner smaller-font">

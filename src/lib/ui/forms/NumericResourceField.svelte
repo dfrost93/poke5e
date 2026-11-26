@@ -8,7 +8,7 @@
 
 <script lang="ts">
 	import { createEventDispatcher } from "svelte"
-	import { ChevronIcon } from "$lib/ui/icons"
+	
 
 	const dispatch = createEventDispatcher()
 
@@ -21,6 +21,7 @@
 	$: width = value?.toString()?.length ?? 0
 
 	const onChange = (e: Event) => {
+		clearTimeout(debounceTimerId.current)
 		const target = e.target as HTMLInputElement
 		const addOrSubtractPattern = /(\d+)\s*(\+|-)\s*(\d+)/
 		const expression = target.value.match(addOrSubtractPattern)
@@ -40,6 +41,7 @@
 	}
 
 	const updateValueBy = (amount: number) => {
+		if (disabled) return
 		value += amount
 
 		clearTimeout(debounceTimerId.current)
@@ -57,60 +59,44 @@
 		if (isNaN(currentValue)) return
 
 		if (e.key === "ArrowDown") {
+			e.preventDefault()
 			decrement()
 		} else if (e.key === "ArrowUp") {
+			e.preventDefault()
 			increment()
 		}
 	}
 </script>
 
-<span class="numeric-resource-field" style:width="{width + 2.5}ch">
-	<input {id} type="text" {value} on:change={onChange} on:input={onInput} on:keydown={onKeyDown} {disabled} autocomplete="off" />
-	<span class="buttons">
-		<button on:click={increment} tabindex="-1"><ChevronIcon.Up label="increment" /></button>
-		<button on:click={decrement} tabindex="-1"><ChevronIcon.Down label="decrement" /></button>
-	</span>
+<span class="numeric-resource-field">
+	<button type="button" aria-label="Decrease value" on:click={decrement} {disabled}>−</button>
+	<input {id} type="text" {value} on:change={onChange} on:input={onInput} on:keydown={onKeyDown} {disabled} autocomplete="off" inputmode="text" style:width="{Math.max(3, width + 1)}ch" />
+	<button type="button" aria-label="Increase value" on:click={increment} {disabled}>+</button>
 </span>
 
 <style>
 	.numeric-resource-field {
 		min-width: var(--input-min-width, 100%);
 		display: inline-flex;
-		position: relative;
-	}
-
-	input {
-		display: inline-block;
-		inline-size: 100%;
-		padding: 0.1em 0.75em 0.1em 0.25em;
-	}
-
-	.buttons {
-		position: absolute;
-		inset-block: 0;
-		inset-inline-end: 0;
-		display: flex;
-		flex-direction: column;
-	}
-
-	button {
-		all: unset;
-		display: flex;
 		align-items: center;
-		justify-content: flex-end;
-		padding-inline: 0.0625em;
+		gap: 0.125rem;
+	}
+	input {
+		min-inline-size: 3ch;
+		max-inline-size: 100%;
 		flex: 1;
-		height: 0;
-		width: 0.5em;
-		overflow: hidden;
+		text-align: center;
+		padding: 0.25rem;
+	}
+	button {
+		box-sizing: border-box;
+		min-inline-size: 44px;
+		min-block-size: 44px;
+		flex: none;
+		font: inherit;
+		font-weight: bold;
 		cursor: pointer;
-	} button:hover, button:focus {
-		background: oklch(100% 0 0 / 0.5);
 	}
-
-	button:first-child {
-		padding-block-start: 0.15em;
-	} button:last-child {
-		padding-block-end: 0.15em;
-	}
+	button:disabled { cursor: default; opacity: 0.5; }
+	button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 </style>

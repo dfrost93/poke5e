@@ -7,7 +7,7 @@
 </script>
 
 <dl class="move-stats-info">
-	{#if value.toHit}
+	{#if value.toHit != null}
 		<div>
 			<dt>{m["movesSection.attack"]()}</dt>
 			<dd><PlusMinus value={value.toHit} /> {m["movesSection.toHit"]()}</dd>
@@ -29,7 +29,7 @@
 				{/if}
 			</dt>
 			<dd class="row">
-				<span>{#if value.damage.dice !== "0"}{value.damage.dice}{/if}{#if value.damage.mod > 0}&nbsp;+ {value.damage.mod}{/if}</span>
+				<span>{#if value.damage.dice !== "0"}{value.damage.dice}{/if}{#if value.damage.mod > 0}&nbsp;+ {value.damage.mod}{:else if value.damage.mod < 0}&nbsp;− {Math.abs(value.damage.mod)}{:else if value.damage.dice === "0"}0{/if}</span>
 			</dd>
 		</div>
 	{/if}

@@ -23,7 +23,7 @@
 	const onChangeQuantity = (item: HeldItem) => (e: CustomEvent<NumericChangeDetail>) => {
 		dispatch("update", {
 			id: item.id,
-			quantity: e.detail.value,
+			quantity: Math.max(0, Math.trunc(e.detail.value)),
 		} as UpdateQuantityDetail)
 	}
 </script>
@@ -81,5 +81,9 @@
 
 	.editable-quantity {
 		--input-min-width: 3ch;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25em;
+		margin-inline-start: 0.25em;
 	}
 </style>

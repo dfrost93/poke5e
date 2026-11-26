@@ -5,6 +5,8 @@
 	import { TeraTypeTag } from "$lib/pokemon/types"
 	import type { PokemonSpecies } from "$lib/poke5e/species"
 	import { m } from "$lib/site/i18n"
+	import { currentEdition } from "$lib/site/edition"
+	import { characterInitiative, effectiveArmorClass, standardItemIds } from "$lib/poke5e/automation/SheetRules"
 
 	export let pokemon: TrainerPokemon
 	export let species: PokemonSpecies
@@ -16,7 +18,9 @@
 
 <FlatDl columns={2}>
 	<dt><abbr title="{m.armorClass()}">{m.ac()}</abbr></dt>
-	<dd>{pokemon.ac}</dd>
+	<dd>{effectiveArmorClass($currentEdition, pokemon.ac, standardItemIds(pokemon))}</dd>
+	<dt>Initiative</dt>
+	<dd>{characterInitiative($currentEdition, pokemon, standardItemIds(pokemon)) >= 0 ? "+" : ""}{characterInitiative($currentEdition, pokemon, standardItemIds(pokemon))}</dd>
 	<dt>{m.nature()}</dt>
 	<dd class="cap">{pokemon.nature.data}</dd>
 	<dt>{m.sr()}</dt>

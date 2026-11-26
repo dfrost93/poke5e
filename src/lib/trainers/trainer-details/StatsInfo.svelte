@@ -4,6 +4,8 @@
 	import { m } from "$lib/site/i18n"
 	import { SpeciesRating } from "$lib/poke5e/sr"
 	import { Pokeslots } from "$lib/poke5e/pokeslots"
+	import { currentEdition } from "$lib/site/edition"
+	import { characterInitiative } from "$lib/poke5e/automation/SheetRules"
 
 	let {
 		trainer,
@@ -11,6 +13,7 @@
 		trainer: TrainerInfo
 	} = $props()
 
+	let initiative = $derived(characterInitiative($currentEdition, trainer))
 	let pb = $derived(trainer.level.proficiencyBonus)
 	let maxSr = $derived(SpeciesRating.maxAllowed(trainer.level))
 	let maxPokeslots = $derived(Pokeslots.maxAllowed(trainer.level))
@@ -21,6 +24,8 @@
 		<FlatDl columns={1}>
 			<dt><abbr title="{m.armorClass()}">{m.ac()}</abbr></dt>
 			<dd>{trainer.ac}</dd>
+			<dt>Initiative</dt>
+			<dd>{initiative >= 0 ? "+" : ""}{initiative}</dd>
 			<dt>{m.bonus()}</dt>
 			<dd>+{pb}</dd>
 			<dt>{m.maxSr()}</dt>

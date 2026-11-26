@@ -4,6 +4,9 @@
 	import { ProficiencyBlock, SkillRanks } from "$lib/dnd/skills"
 	import type { PokemonType } from "$lib/pokemon/types"
 	import { m } from "$lib/site/i18n"
+	import { currentEdition } from "$lib/site/edition"
+	import { generalistBonus } from "$lib/poke5e/automation/SheetRules"
+	import type { TrainerInfo } from "../types"
 	import { skillModifiersFromSpecializations, type Specializations } from "../specializations"
 
 	export let level: Level
@@ -11,10 +14,14 @@
 	export let savingThrows: Attribute[]
 	export let proficiencies: SkillRanks
 
+	export let featureTrainer: TrainerInfo | undefined = undefined
 	export let type: PokemonType | undefined = undefined
 	export let specializations: Specializations | undefined = undefined
 
-	$: extraModifiers = type != null && specializations != null ? skillModifiersFromSpecializations(specializations, type.data) : undefined
+	$: specializationModifiers = type != null && specializations != null ? skillModifiersFromSpecializations(specializations, type.data) : undefined
+	$: extraModifiers = Object.fromEntries(SkillRanks.list.map(skill => [skill.name,
+		(specializationModifiers?.[skill.name] ?? 0) + generalistBonus($currentEdition, featureTrainer?.path.name, featureTrainer?.level.data ?? 0, featureTrainer?.level.proficiencyBonus ?? 0, proficiencies.isProficient(skill.name))
+	]))
 </script>
 
 <h3>{m.saves()}</h3>
@@ -37,8 +44,8 @@
 		extraModifiers: extraModifiers,
 	}))} columnsLg={2} columns={1} />
 </div>
-{#if extraModifiers?.athletics > 0}
-	<p class="footnote"><small>+{extraModifiers.athletics} from trainer specialization included</small></p>
+{#if (specializationModifiers?.athletics ?? 0) > 0}
+	<p class="footnote"><small>+{specializationModifiers?.athletics} from trainer specialization included</small></p>
 {/if}
 
 <style>
