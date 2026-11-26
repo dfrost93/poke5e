@@ -25,6 +25,10 @@
 	import { TagList, TagListInfo } from "$lib/poke5e/tags"
 	import type { LearnedMove } from "$lib/moves/learned"
 
+	import EffectsPanel from "$lib/poke5e/automation/EffectsPanel.svelte"
+	import { effectiveAttributes, totalModifier, type Effect } from "$lib/poke5e/automation/ActiveEffects"
+	import { currentEdition } from "$lib/site/edition"
+
 	const dispatch = createEventDispatcher()
 
 	export let trainer: Trainer
@@ -32,6 +36,14 @@
 	export let species: PokemonSpecies
 	export let editable: boolean
 	export let pokemonTags: TagList
+	let effects: Effect[] = []
+	let effectOwner = ""
+	const resetEffects = (id: string, edition: string) => {
+		const key = id + ":" + edition
+		if (effectOwner !== key) { effects = []; effectOwner = key }
+	}
+	$: resetEffects(pokemon.id, $currentEdition)
+	$: effective = { ...pokemon, attributes: effectiveAttributes(pokemon.attributes, effects), ac: pokemon.ac + totalModifier(effects, "ac") }
 
 	$: hasImage = pokemon.avatar != null || species.media != null && species.media.hasAnyMedia()
 
@@ -92,19 +104,21 @@
 			on:update={onUpdateHealth}
 		/>
 	</div>
-	<StatsInfo {pokemon} {species} />
+	<StatsInfo pokemon={effective} {species} {effects} />
 	{#if !hasImage}
 		<BondInfo value={pokemon.bond} {editable} on:update={onUpdateBond} />
 	{/if}
 	<SpeciesPortrait slot="art" media={species.media} avatar={pokemon.avatar} alt="" shiny={pokemon.isShiny} gender={pokemon.gender} />
 	<BondInfo slot="after-art" value={pokemon.bond} {editable} on:update={onUpdateBond} />
 </SideArtCardSection>
+<EffectsPanel bind:effects edition={$currentEdition} level={pokemon.level.data} {editable} moves={pokemon.moves.map(move => move.moveId)} abilities={pokemon.abilities.map(ability => ability.referenceId ?? "")} saves={pokemon.savingThrows} />
 <section class="stats">
 	<VisuallyHidden><h2>Stats</h2></VisuallyHidden>
-	<AttributeBlock attributes={pokemon.attributes} />
+	<AttributeBlock attributes={effective.attributes} />
 	<SkillsInfo
 		level={pokemon.level}
-		attributes={pokemon.attributes}
+		attributes={effective.attributes}
+		effects={effects}
 		savingThrows={pokemon.savingThrows}
 		proficiencies={pokemon.proficiencies}
 		type={pokemon.type}
@@ -128,7 +142,7 @@
 	</section>
 {/if}
 <section>
-	<MovesInfo {pokemon} {trainer} {editable} on:update={onUpdatePp} />
+	<MovesInfo pokemon={effective} {trainer} {effects} {editable} on:update={onUpdatePp} />
 </section>
 {#if pokemon.notes?.length > 0}
 	<hr />

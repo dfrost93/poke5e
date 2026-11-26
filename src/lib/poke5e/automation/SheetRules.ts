@@ -5,6 +5,7 @@ import type { Move } from "$lib/moves/Move"
 import type { LearnedMove } from "$lib/moves/learned"
 import { Stab } from "$lib/pokemon/stab"
 import type { MoveStats } from "$lib/moves/MoveStats"
+import { totalModifier, type Effect } from "./ActiveEffects"
 
 type Source = { name: string, amount: number }
 export type SheetBonuses = { attack: Source[], damage: Source[], dc: Source[], stabMultiplier: number, notes: string[] }
@@ -39,8 +40,19 @@ export function moveBonuses(input: RuleInput): SheetBonuses {
 		if (ability("competitive") && ["Poisoned", "BadlyPoisoned", "Burned", "Confused", "Paralysis"].includes(input.status ?? "")) add(result.damage, "Competitive", pb)
 		if (item("muscle-band") && input.scope === "melee") add(result.damage, "Muscle Band (once per move)", pb)
 		if (item("wise-glasses") && input.scope === "ranged") add(result.damage, "Wise Glasses (once per move)", pb)
-		if (item("charcoal") && input.moveType === "fire") add(result.damage, "Charcoal (once per move)", pb)
-		if (item("black-belt") && input.moveType === "fighting") add(result.damage, "Black Belt (once per move)", pb)
+		const typeItems: Record<string, [string, string]> = {
+			fighting: ["black-belt", "Black Belt"], dark: ["black-glasses", "Black Glasses"],
+			fire: ["charcoal", "Charcoal"], dragon: ["dragon-fang", "Dragon Fang"],
+			fairy: ["fairy-feather", "Fairy Feather"], rock: ["hard-stone", "Hard Stone"],
+			electric: ["magnet", "Magnet"], grass: ["miracle-seed", "Miracle Seed"],
+			water: ["mystic-water", "Mystic Water"], ice: ["never-melt-ice", "Never-Melt Ice"],
+			poison: ["poison-barb", "Poison Barb"], flying: ["sharp-beak", "Sharp Beak"],
+			normal: ["silk-scarf", "Silk Scarf"], bug: ["silver-powder", "Silver Powder"],
+			ground: ["soft-sand", "Soft Sand"], ghost: ["spell-tag", "Spell Tag"],
+			psychic: ["twisted-spoon", "Twisted Spoon"],
+		}
+		const typed = typeItems[input.moveType]
+		if (typed && item(typed[0])) add(result.damage, typed[1] + " (once per move)", pb)
 	}
 	return result
 }
@@ -66,7 +78,7 @@ export function generalistBonus(edition: Edition, path: string | undefined, leve
 	return edition === "2024" && path === "Hobbyist" && level >= 9 && !proficient ? Math.floor(pb / 2) : 0
 }
 
-export function calculateSheetMove(edition: Edition, move: Move, learnedMove: LearnedMove, pokemon: TrainerPokemon, trainer?: TrainerInfo): { stats: MoveStats, notes: string[] } {
+export function calculateSheetMove(edition: Edition, move: Move, learnedMove: LearnedMove, pokemon: TrainerPokemon, trainer?: TrainerInfo, effects: readonly Effect[] = []): { stats: MoveStats, notes: string[] } {
 	const damaging = move.dice ? move.dice.type === "damage" : move.damage != null && move.damage.data.type !== "healing"
 	const bonuses = moveBonuses({
 		edition, hp: pokemon.hp.current, maxHp: pokemon.hp.max, proficiency: pokemon.level.proficiencyBonus,
@@ -92,5 +104,17 @@ export function calculateSheetMove(edition: Edition, move: Move, learnedMove: Le
 	if (stats.toHit != null) { stats.toHit += sum(bonuses.attack); describe("attack", bonuses.attack) }
 	if (stats.save) { stats.save.dc += sum(bonuses.dc); describe("save DC", bonuses.dc) }
 	if (stats.damage && damaging) { stats.damage.mod += sum(bonuses.damage); describe("damage", bonuses.damage) }
+	const activeAttack = totalModifier(effects, "attack")
+	const activeDamage = totalModifier(effects, "damage")
+	const activeDc = totalModifier(effects, "dc")
+	if (stats.toHit != null) stats.toHit += activeAttack
+	if (stats.damage && damaging) stats.damage.mod += activeDamage
+	if (stats.save) stats.save.dc += activeDc
+	for (const effect of effects) {
+		const attack = (effect.modifiers.attack ?? 0) + (effect.mirages ?? 0)
+		const damage = effect.modifiers.damage ?? 0
+		const dc = effect.modifiers.dc ?? 0
+		if ((attack && stats.toHit != null) || (damage && stats.damage && damaging) || (dc && stats.save)) notes.push(effect.name + " (active)")
+	}
 	return { stats, notes }
 }

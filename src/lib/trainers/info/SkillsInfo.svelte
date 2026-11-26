@@ -7,8 +7,10 @@
 	import { currentEdition } from "$lib/site/edition"
 	import { generalistBonus } from "$lib/poke5e/automation/SheetRules"
 	import type { TrainerInfo } from "../types"
+	import { totalModifier, noEffects, type Effect } from "$lib/poke5e/automation/ActiveEffects"
 	import { skillModifiersFromSpecializations, type Specializations } from "../specializations"
 
+	export let effects: readonly Effect[] = noEffects
 	export let level: Level
 	export let attributes: Attributes
 	export let savingThrows: Attribute[]
@@ -20,7 +22,7 @@
 
 	$: specializationModifiers = type != null && specializations != null ? skillModifiersFromSpecializations(specializations, type.data) : undefined
 	$: extraModifiers = Object.fromEntries(SkillRanks.list.map(skill => [skill.name,
-		(specializationModifiers?.[skill.name] ?? 0) + generalistBonus($currentEdition, featureTrainer?.path.name, featureTrainer?.level.data ?? 0, featureTrainer?.level.proficiencyBonus ?? 0, proficiencies.isProficient(skill.name))
+		totalModifier(effects, "skill") + (specializationModifiers?.[skill.name] ?? 0) + generalistBonus($currentEdition, featureTrainer?.path.name, featureTrainer?.level.data ?? 0, featureTrainer?.level.proficiencyBonus ?? 0, proficiencies.isProficient(skill.name))
 	]))
 </script>
 
@@ -31,6 +33,7 @@
 		attr: attr.abbr,
 		proficient: savingThrows.includes(attr.abbr),
 		expert: false,
+		extraModifiers: { [attr.abbr]: totalModifier(effects, "save") },
 	}))} columnsLg={3} columns={2} />
 </div>
 

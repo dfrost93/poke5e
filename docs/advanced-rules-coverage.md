@@ -21,3 +21,13 @@ This branch introduces derived sheet calculations, not a combat simulator. The 2
 | Inventory | Negative quantity prevented on edit; consumption and undo pending |
 
 Important: existing manual move bonuses are preserved. Remove any manual duplicate bonuses (e.g. an Ace Trainer +1 manually entered) when adopting automation. A future migration/override interface must prevent double-counting. No saved character data or schema changes in this milestone. Unsupported effects remain manual; no claim of full coverage. Verify with pnpm test:unit, pnpm check and browser tests before merging.
+
+## Milestone 2: active effects (draft)
+
+- Local, editable active effects panel on trainer and Pokémon sheets; state is not saved and is cleared on character/edition change or page unload. No shared combat state or PP/action consumption yet.
+- Custom numeric modifiers to attributes, AC, attack, damage, DC, saves, skills, initiative, speed. Attack/damage/DC and movement apply on Pokémon sheets; trainer attack/movement systems are not present. Attribute changes are bounded to 1–30 and recalculate derived values; HP maximum adjustments from CON are not implemented.
+- 2024 move presets: Agility, Barrier (self only), Bulk Up, Defense Curl (AC only), Swords Dance (mirages, manual bonus damage), Growl and Sand Attack (confirmed failed saves). Ten-turn duration uses manual start-of-turn ticks. Concentration replacement/removal and stack limits included; no target automation.
+- Beast Boost, Soul-Heart, Eelevate: confirm trigger, +2 to save-proficient attributes up to +10 per ability, until end of combat. The combined interaction of multiple such abilities needs review.
+- 17 verified type-boosting held items now included, with once-per-move reminders. No enforcement of hit counts yet.
+- Initiative d20 button stores the roll and modifier used, not a shared initiative order.
+- Previous manual modifiers remain in place; remove any duplicates before play. Do not merge until unit tests, type-check and browser checks pass.

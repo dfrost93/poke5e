@@ -18,6 +18,7 @@
 	import { MovePower } from "../MovePower"
 	import type { TrainerPokemon, TrainerInfo } from "$lib/trainers/types"
 	import { calculateSheetMove } from "$lib/poke5e/automation/SheetRules"
+	import { noEffects, type Effect } from "$lib/poke5e/automation/ActiveEffects"
 
 	// needed because svelte strips away ending spaces
 	const COMMA_SPACE = ", "
@@ -25,6 +26,7 @@
 	let {
 		value,
 		pokemon,
+		effects = noEffects,
 		trainer,
 		level,
 		stab,
@@ -35,6 +37,7 @@
 	}: {
 		value: LearnedMove,
 		pokemon?: TrainerPokemon,
+		effects?: readonly Effect[],
 		trainer?: TrainerInfo,
 		level: Level,
 		stab: Stab,
@@ -46,7 +49,7 @@
 
 	const move = $derived($MovesStore.result?.find((it) => it.id === value.moveId))
 	const currentPp = $derived(value.pp.current)
-	const automated = $derived(move && pokemon ? calculateSheetMove($currentEdition, move, value, pokemon, trainer) : undefined)
+	const automated = $derived(move && pokemon ? calculateSheetMove($currentEdition, move, value, pokemon, trainer, effects) : undefined)
 	const moveStats = $derived(automated?.stats ?? move?.calculateMoveStats($currentEdition, {
 		attributes: attributes,
 		level: level,

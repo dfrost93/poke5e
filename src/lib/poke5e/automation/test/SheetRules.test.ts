@@ -47,3 +47,8 @@ describe("2024 sheet rules", () => {
 		expect(generalistBonus("2024", "Hobbyist", 9, 4, true)).toBe(0)
 	})
 })
+
+it("supports all 17 verified typed held-item bonuses", () => {
+	const pairs = [["fighting","black-belt"],["dark","black-glasses"],["fire","charcoal"],["dragon","dragon-fang"],["fairy","fairy-feather"],["rock","hard-stone"],["electric","magnet"],["grass","miracle-seed"],["water","mystic-water"],["ice","never-melt-ice"],["poison","poison-barb"],["flying","sharp-beak"],["normal","silk-scarf"],["bug","silver-powder"],["ground","soft-sand"],["ghost","spell-tag"],["psychic","twisted-spoon"]]
+	for (const [moveType, item] of pairs) expect(moveBonuses({ ...base, moveType, items: [item] }).damage[0]?.amount).toBe(3)
+})
