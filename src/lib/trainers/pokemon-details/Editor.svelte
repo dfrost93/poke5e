@@ -122,7 +122,8 @@
 	<BondFieldset bind:value={bond} {disabled} />
 	<ProficienciesFieldset bind:values={proficiencies} {disabled} />
 	<AttributeCheckboxFields label={m.savingThrows()} bind:values={savingThrows} {disabled} />
-	<MovesFieldset bind:values={moves} {species} level={new Level(level)} {disabled} />
+	<Fieldset title="Pokémon typing"><TypeField bind:value={type.data} {disabled} /></Fieldset>
+	<MovesFieldset bind:values={moves} {species} chosenTypes={type.data} level={new Level(level)} {disabled} />
 	<FeatsFieldset feats={$DndAndPokemonFeats} bind:values={feats} {disabled} />
 	<HeldItemsFieldset bind:items {disabled} />
 	<Fieldset title="{m.general()}">
@@ -130,7 +131,6 @@
 		<TagListField label="{m.tags()}" bind:value={tags} possibleTags={pokemonTags} />
 	</Fieldset>
 	<FormDetails title="Advanced">
-		<TypeField bind:value={type.data} {disabled} />
 		<CustomBasicInfoFieldset bind:customSize bind:customHitDiceSize {disabled} />
 		<SpeedsFieldset bind:values={speeds} {disabled} />
 		<SensesFieldset bind:values={senses} {disabled} />

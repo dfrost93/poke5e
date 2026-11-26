@@ -8,6 +8,7 @@
 	import { m } from "$lib/site/i18n"
 	import type { PokemonSpecies } from "$lib/poke5e/species"
 	import { AbilityStore } from "./AbilityStore"
+	import AbilityDescription from "./AbilityDescription.svelte"
 
 	export let id: string
 	export let value: Ability
@@ -15,6 +16,7 @@
 	export let disabled: boolean = false
 
 	$: fieldName = getAbilityFieldName(id)
+	$: selectedAbility = $AbilityStore.result?.find(ability => ability.referenceId === value.referenceId) ?? value
 
 	$: abilitiesAsList = species.abilities.toList()
 
@@ -61,6 +63,7 @@
 			value.data.description = newAbility.data.description
 			value.data.untraceable = newAbility.data.untraceable
 			value.data.referenceId = newAbility.referenceId
+			value = value
 		}
 	}
 </script>
@@ -69,6 +72,7 @@
 	<Removable on:remove>
 		<SelectField label="{m.ability()}" name="{fieldName}" options={abilityOptions} value={currentSelectValue} {disabled} on:change={handleSelectChange} />
 	</Removable>
+	<details open><summary>Ability rules: {selectedAbility.name}</summary><AbilityDescription value={selectedAbility} /></details>
 {:else}
 	<Removable on:remove>
 		<TextField label="{m.name()}" name="{fieldName}" bind:value={value.data.name} {disabled} />

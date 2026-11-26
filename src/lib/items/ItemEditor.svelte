@@ -8,6 +8,7 @@
 	import { ItemStore } from "./store"
 	import { Item, type ItemType } from "./Item"
 	import { m } from "$lib/site/i18n"
+	import { Markdown } from "$lib/ui/rendering"
 
 	export let value: HeldItem
 	export let groupOrder: ItemType[] = []
@@ -23,12 +24,14 @@
 	})))
 
 	$: itemFieldName = getItemFieldName(value.id)
+	$: selected = value.type === "standard" ? ($ItemStore ?? []).find(item => item.id === value.itemId) : undefined
 </script>
 
 {#if value.type === "standard"}
 	<Removable on:remove>
 		<SelectField label="Item" name="{itemFieldName}" bind:value={value.itemId} options={itemOptions} {disabled} />
 	</Removable>
+	{#if selected}<details open><summary>{selected.name} · {selected.type}</summary><Markdown value={selected.description} />{#if selected.cost != null}<p>Cost: ₽{selected.cost}</p>{/if}</details>{/if}
 {:else}
 	<Removable on:remove>
 		<TextField label={m.name()} name="{itemFieldName}" bind:value={value.name} {disabled} />

@@ -5,6 +5,9 @@
 	import MoveDescription from "$lib/moves/MoveDescription.svelte"
 	import type { Move } from "$lib/moves/Move"
 	import { PokemonType } from "../types"
+	import { MoveRange } from "$lib/moves/range"
+	import { MoveTime } from "$lib/moves/time"
+	import { MoveDuration } from "$lib/moves/duration"
 
 	export let idPrefix: string
 	export let value: Move
@@ -30,6 +33,8 @@
 		</Tag>
 	</div>
 	<div class="smaller padded" id="{infoId}" hidden={!showInfo}>
+		<p><strong>PP:</strong> {value.pp} · <strong>Power:</strong> {value.power.toString()}</p>
+		<p><strong>Range:</strong> {MoveRange.display(value.range, value.shape)} · <strong>Time:</strong> {MoveTime.display(value.time)} · <strong>Duration:</strong> {MoveDuration.display(value.duration)}</p>
 		<MoveDescription move={value} />
 	</div>
 </div>

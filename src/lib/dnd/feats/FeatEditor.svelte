@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Removable, SelectField, MarkdownField, TextField, Divider } from "$lib/ui/forms"
+	import { Markdown } from "$lib/ui/rendering"
 	import type { ChosenFeat } from "./ChosenFeat"
 
 	export let value: ChosenFeat
 	export let custom: boolean = false
 	export let options: { name: string, value: string, placeholder: string }[]
 	export let disabled: boolean = false
+	$: selected = options.find(option => option.value === value.name)
 </script>
 
 <div class="feat-editor">
@@ -19,6 +21,9 @@
 	{#if custom}
 		<MarkdownField label="Feat Description" name="feat-description-{value.id}" bind:value={value.description} placeholder="Provide a custom description" rows={6} {disabled} />
 	{:else}
+		{#if selected}
+			<details open><summary>Feat rules: {selected.name}</summary><Markdown value={selected.placeholder} /></details>
+		{/if}
 		<MarkdownField label="Notes" name="feat-description-{value.id}" bind:value={value.description} placeholder="Any additional notes" rows={4} {disabled} />
 	{/if}
 	<Divider />

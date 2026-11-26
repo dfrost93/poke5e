@@ -12,16 +12,18 @@
 	import { MoveOption } from "$lib/pokemon/move-pool"
 	import { FeatureToggles } from "$lib/site/FeatureToggles"
 	import { m } from "$lib/site/i18n"
+	import { recommendMoves } from "$lib/poke5e/automation/MoveSuggestions"
+	import type { PokeType } from "$lib/pokemon/types"
 	import { Button, Details, VisuallyHidden } from "$lib/ui/elements"
 	import { Fieldset, focusInputField, InstructionText } from "$lib/ui/forms"
 
-	// do not show all moves if above this number
-	const SHOW_ALL_THRESHOLD = 25
+	const PAGE_SIZE = 30
 
 	export let values: LearnedMove[]
 	export let species: PokemonSpecies
 	export let level: Level
 	export let disabled: boolean
+	export let chosenTypes: readonly PokeType[] = []
 
 	let newMoveId = -1001
 	const nextNewMoveId = () => (--newMoveId).toString()
@@ -45,6 +47,7 @@
 	}
 
 	const addSpecificMove = (move: Move) => () => {
+		if (disabled || values.some(value => value.moveId === move.id)) return
 		const nextId = nextNewMoveId()
 
 		values = [...values, LearnedMove.create({
@@ -64,7 +67,20 @@
 	$: filteredMoves = ($MovesStore.result ?? []).filter(moveFilter.apply)
 	$: learnableMoves = LearnableMoves.groupMoves(filteredMoves, species, level)
 
-	$: showAllMoves = filteredMoves.length <= SHOW_ALL_THRESHOLD
+	let libraryMode: "recommended" | "all" = "recommended"
+	let page = 1
+	const setLibrary = (mode: "recommended" | "all") => { libraryMode = mode; page = 1 }
+	$: suggestions = recommendMoves(filteredMoves,
+		species.moves.availableAtLevel(level),
+		[...(species.moves.level2 ?? []), ...(species.moves.level6 ?? []), ...(species.moves.level10 ?? []), ...(species.moves.level14 ?? []), ...(species.moves.level18 ?? [])],
+		chosenTypes, values.map(move => move.moveId))
+	$: allGroups = learnableMoves.nonemptyGroups()
+	$: allEntries = allGroups.flatMap(group => group.moves.map(move => ({ move, group: group.name })))
+	$: uniqueEntries = allEntries.filter((entry, index) => allEntries.findIndex(other => other.move.id === entry.move.id) === index)
+	$: visibleEntries = libraryMode === "recommended" ? suggestions.map(suggestion => ({ move: suggestion.move, group: suggestion.reason })) : uniqueEntries
+	$: totalPages = Math.max(1, Math.ceil(visibleEntries.length / PAGE_SIZE))
+	$: currentPage = Math.min(page, totalPages)
+	$: pageEntries = visibleEntries.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE)
 
 	const replaceMove = (updated: LearnedMove) => {
 		values = values.map((it) => it.id === updated.id ? { ...updated } : it)
@@ -80,7 +96,7 @@
 			{/if}
 			<div class="move-list">
 				{#each values as move (move.id)}
-					<MoveEditor value={move} {species} {disabled} onremove={removeMove(move.id)} {level} />
+					<MoveEditor value={move} {species} {disabled} onremove={removeMove(move.id)} onchange={replaceMove} {level} />
 				{/each}
 			</div>
 		</div>
@@ -96,31 +112,28 @@
 					bind:powerFilter={movePowerFilter}
 					{disabled}
 				/>
-				{#each learnableMoves.nonemptyGroups() as group}
-					{#if group.name !== LearnableMoves.groups.Other || showAllMoves}
-						<div class="move-group">
-							<p style:margin-top="1em"><strong>{group.name}</strong></p>
-							<div class="move-list">
-								{#each group.moves as move}
-									{@const isAdded = values.map((it) => it.moveId).includes(move.id)}
-									<div class="move-option" class:added={isAdded}>
-										<MoveOption idPrefix="moves-to-add" value={move} useTmName={group.name === LearnableMoves.groups.TMs}>
-											{#if isAdded}
-												<Button variant="subtle" disabled>
-													<span class="smaller">Added</span>
-												</Button>
-											{:else}
-												<Button variant="success" on:click={addSpecificMove(move)}>
-													<strong><span aria-hidden="true">+</span><VisuallyHidden inline>{m.add()}</VisuallyHidden></strong>
-												</Button>
-											{/if}
-										</MoveOption>
-									</div>
-								{/each}
-							</div>
+				<div class="library-modes">
+					<button type="button" aria-pressed={libraryMode === "recommended"} on:click={() => setLibrary("recommended")}>Suggested moves</button>
+					<button type="button" aria-pressed={libraryMode === "all"} on:click={() => setLibrary("all")}>All moves</button>
+				</div>
+				<p class="smaller">Suggestions update with level, species and selected types. Type matches outside the species pool are optional homebrew, not automatic unlocks. TM and egg requirements still apply.</p>
+				<p>{visibleEntries.length} results · page {currentPage} of {totalPages}</p>
+				{#if !pageEntries.length}<p>No matching moves. Try All moves or change the filters.</p>{/if}
+				<div class="move-list">
+					{#each pageEntries as entry (entry.move.id)}
+						{@const isAdded = values.some(it => it.moveId === entry.move.id)}
+						<div>
+							<small>{entry.group}</small>
+							<MoveOption idPrefix="moves-to-add" value={entry.move}>
+								<Button variant={isAdded ? "subtle" : "success"} disabled={disabled || isAdded} on:click={addSpecificMove(entry.move)}>{isAdded ? "Added" : "+ Add"}</Button>
+							</MoveOption>
 						</div>
-					{/if}
-				{/each}
+					{/each}
+				</div>
+				<div class="library-modes">
+					<button type="button" disabled={currentPage <= 1} on:click={() => page = currentPage-1}>Previous</button>
+					<button type="button" disabled={currentPage >= totalPages} on:click={() => page = currentPage+1}>Next</button>
+				</div>
 			</Details>
 		</div>
 	{:else}
@@ -149,9 +162,9 @@
 		border-block-end: 0.0625em dotted var(--skin-bg);
 	}
 
-	.move-group {
-		margin-block-end: 1.75em;
-	}
+	.library-modes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-block: 0.5rem; }
+	.library-modes button { min-height: 44px; }
+	.library-modes button[aria-pressed="true"] { font-weight: bold; outline: 2px solid currentColor; }
 
 	.move-list {
 		display: flex;

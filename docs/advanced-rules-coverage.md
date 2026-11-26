@@ -31,3 +31,10 @@ Important: existing manual move bonuses are preserved. Remove any manual duplica
 - 17 verified type-boosting held items now included, with once-per-move reminders. No enforcement of hit counts yet.
 - Initiative d20 button stores the roll and modifier used, not a shared initiative order.
 - Previous manual modifiers remain in place; remove any duplicates before play. Do not merge until unit tests, type-check and browser checks pass.
+
+## Milestone 3: selection and builder UX (draft)
+- Move library removes 25-result hiding in the feature-enabled editor, with pagination, search, full library access and type-sensitive suggestions. Species level eligibility is authoritative; matching-type non-species suggestions are explicitly homebrew, not level-approved. Later level moves are excluded from suggestions. No persistent custom level/egg/TM pool yet.
+- Pokémon typing moved above move selection. Selected known moves are not removed automatically.
+- Trainer create opens the guided seven-step editor after creating a basic trainer record. Review shows existing calculated initiative, skills and saves; new standard path resources are initialized when eligible. Permanent feat and specialization acquisition choices remain the existing level-up workflow or manual edits; all-choice automation is not complete.
+- Responsive ability cards and skill/save attribute labels; inline rule details for moves, feats, items, abilities and trainer paths. D&D feats whose source is only a handbook reference remain references. No copied proprietary handbook text.
+- Four recommendation unit tests added. Full build, type-check, browser and accessibility tests still required.
