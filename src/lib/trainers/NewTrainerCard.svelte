@@ -15,6 +15,7 @@
 	import { Url } from "$lib/site/url"
 	import { m } from "$lib/site/i18n"
 	import { getTrainerHitDice } from "./hit-dice"
+	import { PageAction } from "./page-action"
 
 	let name = ""
 	let description = ""
@@ -33,7 +34,7 @@
 				max: startingHp,
 			},
 		}).then(({ info }) => {
-			goto(Url.trainers(info.readKey))
+			goto(Url.trainers(info.readKey, undefined, PageAction.editTrainer))
 		}).catch(() => {
 			saving = false
 		})
@@ -51,10 +52,10 @@
 			<TextField label={m.name()} bind:value={name} {disabled} required />
 			<MarkdownField label="Description" bind:value={description} rows={6} {disabled} />
 		</Fieldset>
-		<HintText>Once your trainer is created, you will be able to edit their stats, Pokémon, and inventory!</HintText>
+		<HintText>Create your trainer to open the guided character builder. You can return to finish it later.</HintText>
 		<ActionArea>
 			<Button on:click={cancel} variant="subtle" {disabled}>{m.cancel()}</Button>
-			<Button type="submit" {disabled}>{m.finish()}</Button>
+			<Button type="submit" {disabled}>Start character builder</Button>
 		</ActionArea>
 	</Form>
 </Card>

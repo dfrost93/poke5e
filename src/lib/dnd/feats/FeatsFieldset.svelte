@@ -48,8 +48,8 @@
 </script>
 
 <Fieldset title="{m.feats()}">
-	{#each values as value}
-		<FeatEditor {value} options={options} {disabled} custom={value.isCustom} on:remove={removeFeat(value.id)} />
+	{#each values as value, index (value.id)}
+		<FeatEditor bind:value={values[index]} options={options} {disabled} custom={value.isCustom} on:remove={removeFeat(value.id)} />
 	{/each}
 	<div class="row">
 		<Button on:click={addStandardFeat}>{m.addFeat()}</Button>

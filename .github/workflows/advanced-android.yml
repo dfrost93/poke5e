@@ -1,0 +1,52 @@
+name: Poké5e Advanced Android APK
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PUBLIC_ANALYTICS_ENABLED: false
+      PUBLIC_OFFLINE: false
+      PUBLIC_SUPABASE_URL: ${{ secrets.ADVANCED_SUPABASE_URL }}
+      PUBLIC_SUPABASE_KEY: ${{ secrets.ADVANCED_SUPABASE_PUBLIC_KEY }}
+      PUBLIC_USER_ASSETS_BASE_URL: ${{ secrets.ADVANCED_USER_ASSETS_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check independent backend configuration
+        shell: bash
+        run: |
+          if [[ "$PUBLIC_SUPABASE_URL" != https://* || -z "$PUBLIC_SUPABASE_KEY" || "$PUBLIC_USER_ASSETS_BASE_URL" != https://* ]]; then
+            echo "::error::Configure the independent Advanced Supabase URL, public client key and HTTPS user assets URL first."
+            exit 1
+          fi
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm check
+      - name: Prepare Capacitor native project
+        working-directory: mobile
+        run: |
+          npm install --no-audit --no-fund
+          mkdir -p www
+          cp -a ../build/. www/
+          npx cap add android
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: poke5e-advanced-android-debug
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

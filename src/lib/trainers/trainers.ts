@@ -9,6 +9,7 @@ import { TagList } from "$lib/poke5e/tags"
 import type { TransferCode } from "./pokemon-transfer"
 import * as list from "$lib/utils/list"
 import type { LearnedMove } from "$lib/moves/learned"
+import { relocatePokemon, type PokemonStorage } from "./storage"
 
 type AllTrainers = (TrainerData & WithUpdater & WithRemover & WithTags)[]
 
@@ -38,6 +39,7 @@ type TrainerUpdater = {
 	move: (info: LearnedMove, options?: UpdaterOptions) => Promise<void>
 	addToTeam: (pokemon: PokemonSpecies) => Promise<TrainerPokemon>
 	acceptTransfer: (code: TransferCode) => Promise<TrainerPokemon>
+	setStorage: (id: string, storage: PokemonStorage) => Promise<void>
 	reorderTeam: (info: TrainerPokemon[]) => Promise<void>
 	removeFromTeam: (id: string) => Promise<void>
 }
@@ -130,6 +132,7 @@ export const createStore = () => {
 					pokemonList[pokeIndex] = {
 						...prev.pokemon[pokeIndex],
 						...info,
+						storage: prev.pokemon[pokeIndex].storage,
 					}
 
 					return {
@@ -296,6 +299,7 @@ export const createStore = () => {
 								pokemonList[pokeIndex] = {
 									...prev.pokemon[pokeIndex],
 									...info,
+									storage: prev.pokemon[pokeIndex].storage,
 									avatar: avatar,
 								}
 
@@ -452,12 +456,21 @@ export const createStore = () => {
 								throw e
 							})
 						},
+						setStorage: async (id: string, storage: PokemonStorage) => {
+							try {
+								await provider.setPokemonStorage(data.writeKey,data.info.readKey,id,storage)
+								storeUpdateOne(readKey,prev=>({ ...prev, pokemon: relocatePokemon(prev.pokemon,id,storage) }))
+							} catch (e) {
+								error.show("setPokemonStorage",e)
+								throw e
+							}
+						},
 						reorderTeam: (order: TrainerPokemon[]) => {
 							return provider.reorderPokemonTeam(data.writeKey, data.info.readKey, order).then(() => {
 								storeUpdateOne(readKey, (prev) => {
 									return {
 										...prev,
-										pokemon: order,
+										pokemon: [...order.flatMap(entry => prev.pokemon.filter(p => p.id === entry.id)), ...prev.pokemon.filter(p => !order.some(entry => entry.id === p.id))],
 									}
 								})
 							}).catch((e: Error) => {

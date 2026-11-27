@@ -1,0 +1,10 @@
+{
+  "name": "poke5e-advanced-android",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {
+    "@capacitor/core": "7.6.9",
+    "@capacitor/android": "7.6.9",
+    "@capacitor/cli": "7.6.9"
+  }
+}

@@ -31,6 +31,7 @@
 				{/if}
 			</span>
 			<span>{value.name}</span>
+			<small class="attribute">{value.attr.toUpperCase()}</small>
 		</dt>
 		<dd class:even class:even-lg={evenLg}>{modifier >= 0 ? "+" : ""}{modifier}</dd>
 		<dd class:even class:even-lg={evenLg} aria-hidden="true"></dd>
@@ -47,12 +48,13 @@
 	}
 
 	dt {
-		padding: 0.25em;
+		padding: 0.45em 0.25em;
 	}
 
 	dd {
-		padding: 0.25em 0.375em;
+		padding: 0.45em 0.5em;
 	}
+	.attribute { opacity: .8; margin-inline-start: .4em; font-size: .75em; }
 
 	.icon {
 		display: inline-block;

@@ -10,6 +10,7 @@
 	import { Url } from "$lib/site/url"
 	import { PageAction } from "../page-action"
 	import type { LearnedMove } from "$lib/moves/learned"
+import { locationOf } from "../storage"
 
 	export let trainer: TrainerStore
 	export let id: PokemonId
@@ -46,6 +47,7 @@
 		<WithSpecies let:species ids={[pokemon?.pokemonId]}>
 			<Card title={pokemon.nickname} dismissToHref="{Url.trainers($trainer.info.readKey, undefined, PageAction.fullList)}">
 				<TypeTag slot="header-extra" type={pokemon.type.data} />
+				<p><strong>Location:</strong> {locationOf(pokemon) === "box" ? "PC Storage" : "Active party"}</p>
 				<Info trainer={$trainer.info} {pokemon} {species} editable={canEdit} {pokemonTags} on:update-health={onUpdateHealth} on:update-pp={onUpdatePp} on:update-bond={onUpdateBond} on:update-tags={onUpdateTags} />
 				{#if canEdit}
 					<TrainerPokemonActions {trainer} {species} {pokemon} />

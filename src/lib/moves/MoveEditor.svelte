@@ -27,6 +27,7 @@
 	import { MoveTimeField } from "./time"
 	import { MoveDurationField } from "./duration"
 	import { MoveRangeField } from "./range"
+	import MoveDescription from "./MoveDescription.svelte"
 
 	let {
 		value = $bindable(),
@@ -131,6 +132,7 @@
 		<Removable on:remove={onremove}>
 			<SelectField label={m.move()} name={moveFieldName} bind:value={value.moveId} options={moveOptions} {disabled} on:change={onMoveChange} />
 		</Removable>
+		{#if theMove}<details open><summary>Move rules: {theMove.name}</summary><MoveDescription move={theMove} /></details>{/if}
 		<IntField label={m.maxPp()} name="move-pp-{value.id}" bind:value={value.pp.max} {disabled} />
 		<MarkdownField label={m.notes()} name="move-notes-{value.id}" bind:value={value.notes} {disabled} />
 	{/if}

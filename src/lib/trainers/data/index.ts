@@ -18,6 +18,7 @@ import { DetailedError } from "$lib/site/errors"
 import type { PostgrestError } from "@supabase/supabase-js"
 import type { TransferCode } from "../pokemon-transfer"
 import type { LearnedMove } from "$lib/moves/learned"
+import type { PokemonStorage } from "../storage"
 
 export type TrainerData = {
 	info: Trainer,
@@ -51,6 +52,7 @@ export interface TrainerDataProvider {
 	removePokemonAvatar: (writeKey: ReadWriteKey, readKey: ReadWriteKey, info: TrainerPokemon) => Promise<void>
 	addPokemonToTeam: (writeKey: ReadWriteKey, readKey: ReadWriteKey, trainerId: TrainerId, pokemon: PokemonSpecies, rank?: number) => Promise<TrainerPokemon>
 	acceptPokemonTransfer: (writeKey: ReadWriteKey, readKey: ReadWriteKey, trainerId: TrainerId, transferCode: TransferCode) => Promise<TrainerPokemon>
+	setPokemonStorage: (writeKey: ReadWriteKey, readKey: ReadWriteKey, id: PokemonId, storage: PokemonStorage) => Promise<void>
 	reorderPokemonTeam: (writeKey: ReadWriteKey, readKey: ReadWriteKey, order: TrainerPokemon[]) => Promise<boolean>
 	removePokemon: (writeKey: ReadWriteKey, readKey: ReadWriteKey, id: string) => Promise<boolean>
 	updateMoveset: (writeKey: ReadWriteKey, readKey: ReadWriteKey, pokemonId: PokemonId, moves: LearnedMove[]) => Promise<LearnedMove[]>

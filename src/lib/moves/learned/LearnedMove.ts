@@ -46,7 +46,7 @@ export const LearnedMove = {
 		customization: {},
 	}),
 	applyToMoveStats: (learnedMove: LearnedMove, stats: MoveStats): MoveStats => {
-		if (stats.toHit)
+		if (stats.toHit != null)
 			stats.toHit += learnedMove.modifiers.toHit
 		if (stats.save)
 			stats.save.dc += learnedMove.modifiers.saveDc

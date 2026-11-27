@@ -1,0 +1,8 @@
+{
+  "appId": "com.poke5eadvanced.app",
+  "appName": "Poké5e Advanced",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

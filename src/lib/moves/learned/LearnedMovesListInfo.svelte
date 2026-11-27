@@ -1,14 +1,19 @@
 <script lang="ts">
-	import type { TrainerPokemon } from "$lib/trainers/types"
+	import type { TrainerPokemon, TrainerInfo } from "$lib/trainers/types"
 	import type { LearnedMove } from "./LearnedMove"
 	import LearnedMoveInfo from "./LearnedMoveInfo.svelte"
+	import { noEffects, type Effect } from "$lib/poke5e/automation/ActiveEffects"
 
 	let {
 		pokemon,
+		effects = noEffects,
+		trainer,
 		editable = false,
 		onupdate,
 	}: {
 		pokemon: TrainerPokemon
+		effects?: readonly Effect[]
+		trainer?: TrainerInfo
 		editable?: boolean,
 		onupdate?: (value: LearnedMove) => void
 	} = $props()
@@ -28,7 +33,7 @@
 <ul>
 	{#each pokemon.moves as move}
 		<li>
-			<LearnedMoveInfo value={move} {editable} level={pokemon.level} attributes={pokemon.attributes} pokemonType={pokemon.type} stab={pokemon.stab} onupdatepp={onUpdatePp(move)} />
+			<LearnedMoveInfo value={move} {pokemon} {trainer} {effects} {editable} level={pokemon.level} attributes={pokemon.attributes} pokemonType={pokemon.type} stab={pokemon.stab} onupdatepp={onUpdatePp(move)} />
 		</li>
 	{/each}
 </ul>

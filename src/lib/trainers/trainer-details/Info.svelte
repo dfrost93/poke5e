@@ -22,10 +22,22 @@
 
 	const allTags = trainers.tags()
 
+	import EffectsPanel from "$lib/poke5e/automation/EffectsPanel.svelte"
+	import { effectiveAttributes, totalModifier, type Effect } from "$lib/poke5e/automation/ActiveEffects"
+	import { currentEdition } from "$lib/site/edition"
+
 	const dispatch = createEventDispatcher()
 
 	export let trainer: Trainer
 	export let editable: boolean
+	let effects: Effect[] = []
+	let effectOwner = ""
+	const resetEffects = (id: string, edition: string) => {
+		const key = id + ":" + edition
+		if (effectOwner !== key) { effects = []; effectOwner = key }
+	}
+	$: resetEffects(trainer.id, $currentEdition)
+	$: effective = { ...trainer, attributes: effectiveAttributes(trainer.attributes, effects), ac: trainer.ac + totalModifier(effects, "ac") }
 
 	$: hasImage = trainer.avatar != null
 	$: trainerHitDiceSize = $getTrainerHitDice(trainer.customHitDiceSize)
@@ -80,13 +92,14 @@
 	</FlatDl>
 	<div class="column">
 		<HealthInfo hp={trainer.hp} hitDice={trainer.hitDice} dieSize={trainerHitDiceSize} {editable} on:update={onUpdateHealth} status={null} level={trainer.level} exp={0} />
-		<StatsInfo {trainer} />
+		<StatsInfo trainer={effective} {effects} />
 	</div>
 	<Art slot="art" src="{trainer.avatar?.href ?? ""}" alt="Trainer Avatar" />
 </SideArtCardSection>
+<EffectsPanel bind:effects edition={$currentEdition} level={trainer.level.data} {editable} />
 <section class="stats">
-	<AttributeBlock attributes={trainer.attributes} />
-	<SkillsInfo level={trainer.level} attributes={trainer.attributes} savingThrows={trainer.savingThrows} proficiencies={trainer.proficiencies} />
+	<AttributeBlock attributes={effective.attributes} />
+	<SkillsInfo level={trainer.level} attributes={effective.attributes} {effects} savingThrows={trainer.savingThrows} proficiencies={trainer.proficiencies} featureTrainer={trainer} />
 	{#if hasSpecialization(trainer.specializations)}
 		<h3>Specializations</h3>
 		<SpecializationsInfo specializations={trainer.specializations} />

@@ -45,9 +45,12 @@ export type PokemonBond = {
 	points: Resource,
 }
 
+import type { PokemonStorage } from "./storage"
+
 export type PokemonId = string
 export type TrainerPokemon = {
 	id: PokemonId,
+	storage?: PokemonStorage,
 	trainerId: TrainerId,
 	pokemonId: SpeciesIdentifier,
 	nickname: string,

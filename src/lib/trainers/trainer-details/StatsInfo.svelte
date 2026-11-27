@@ -4,13 +4,20 @@
 	import { m } from "$lib/site/i18n"
 	import { SpeciesRating } from "$lib/poke5e/sr"
 	import { Pokeslots } from "$lib/poke5e/pokeslots"
+	import { currentEdition } from "$lib/site/edition"
+	import { characterInitiative } from "$lib/poke5e/automation/SheetRules"
+	import { totalModifier, noEffects, type Effect } from "$lib/poke5e/automation/ActiveEffects"
+	import InitiativeRoll from "$lib/poke5e/automation/InitiativeRoll.svelte"
 
 	let {
 		trainer,
+		effects = noEffects,
 	}: {
 		trainer: TrainerInfo
+		effects?: readonly Effect[]
 	} = $props()
 
+	let initiative = $derived(characterInitiative($currentEdition, trainer) + totalModifier(effects, "initiative"))
 	let pb = $derived(trainer.level.proficiencyBonus)
 	let maxSr = $derived(SpeciesRating.maxAllowed(trainer.level))
 	let maxPokeslots = $derived(Pokeslots.maxAllowed(trainer.level))
@@ -58,6 +65,7 @@
 		</FlatDl>
 	</div>
 </div>
+<InitiativeRoll bonus={initiative} />
 
 <style>
 	.two-columns {
