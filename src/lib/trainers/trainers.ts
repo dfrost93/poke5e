@@ -181,7 +181,6 @@ export const createStore = () => {
 								info: {
 									...prev.info,
 									...info,
-									storage: prev.pokemon[pokeIndex].storage,
 									avatar: avatar,
 								},
 							}))
@@ -300,6 +299,7 @@ export const createStore = () => {
 								pokemonList[pokeIndex] = {
 									...prev.pokemon[pokeIndex],
 									...info,
+									storage: prev.pokemon[pokeIndex].storage,
 									avatar: avatar,
 								}
 
